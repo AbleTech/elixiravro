@@ -75,8 +75,18 @@ defmodule Elixiravro do
     # - 1 you need to edfine the type make store as undefined and see from there.
     # - 2 you need to understand what is the store and what is the type
   end
+
+  def read_elixir do
+    {header, schema, objects} = :avro_ocf.decode_file('./data/elixir-examples/data.avro')
+    store = :avro_schema_store.import_file('./data/elixir-examples/schema.avsc', :avro_schema_store.new([]))
+    json_encoder = :avro.make_encoder(store, [{:encoding, :avro_json}])
+
+    objects
+      |> Enum.map(&json_encoder.('User', &1))
+  end
 end
 
 # Elixiravro.create_binary
 # Elixiravro.read_binary
 # Elixiravro.create_file
+# Elixiravro.read_elixir
