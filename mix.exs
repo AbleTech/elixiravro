@@ -21,7 +21,7 @@ defmodule Elixiravro.Mixfile do
   # Run "mix help deps" to learn about dependencies.
   def deps do
     [
-      {:erlavro, git: "https://github.com/klarna/erlavro"},
+      {:erlavro, "~> 2.3.0"},
       {:poison, "~> 3.1"},
     ]
   end

@@ -1,0 +1,33 @@
+{"type": "record", "name": "Message", "namespace": "domain.avro",
+  "fields": [
+    {"name": "type", "type": "string"},
+    {"name": "event", "type": "string"},
+    {"name": "id", "type": "string"},
+    {"name": "correlation_id", "type": "string"},
+    {"name": "version", "type": "string"},
+    {"name": "scoping_id_token", "type": "string"},
+    {"name": "timestamps", "type": {
+        "type": "record", "name": "Hello", "namespace": "domain.event",
+        "fields": [
+          {"name": "event_created", "type": "string"}
+        ]
+      }
+    },
+    {"name": "event_context", "type": {
+        "type": "record", "name": "EventContext", "namespace": "domain.event",
+        "fields": [
+          {"name": "type", "type": "string"},
+          {"name": "version", "type": "string"},
+          {"name": "state", "type": "string"},
+          {"name": "timestamps", "type":{
+              "type": "record", "name": "World", "namespace": "domain.event",
+              "fields": [
+                {"name": "accepted_time", "type": "string"}
+              ]
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

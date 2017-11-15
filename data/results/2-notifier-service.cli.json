@@ -1,0 +1,1 @@
+{"type":"domain_event","event":"booking.confirmed","id":"1","correlation_id":"1","version":"1.0.0","scoping_id_token":"jwt","timestamps":{"event_created":"2017-05-04T22:56:26Z"},"event_context":{"type":"order","version":"1.0.0","state":"confirmed","timestamps":{"accepted_time":"2017-05-04T22:56:26Z"}}}

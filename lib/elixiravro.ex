@@ -1,92 +1,84 @@
 defmodule Elixiravro do
-  @moduledoc """
-  Documentation for Elixiravro.
-  """
+  # def create_binary do
+  #   store = :avro_schema_store.import_file('./lib/schema.json', :avro_schema_store.new([]))
+  #   encoder = :avro.make_encoder(store, [])
+  #   json_encoder = :avro.make_encoder(store, [{:encoding, :avro_json}])
 
-  @doc """
-  Hello world.
+  #   decoder = :avro.make_decoder(store, [])
+  #   json_decoder = :avro.make_decoder(store, [{:encoding, :avro_json}])
 
-  ## Examples
+  #   encoded = File.read!('./lib/content.json')
+  #     |> (&json_decoder.('User', &1)).()
+  #     |> (&encoder.('User', &1)).()
+  #     |> :erlang.iolist_to_binary
 
-      iex> Elixiravro.hello
-      :world
+  #   IO.inspect encoded
 
-  """
-  def hello do
-    :world
-  end
+  #   {:ok, encoded_file} = File.open "0-encoding", [:write, :utf8]
+  #   IO.write encoded_file, encoded
+  #   File.close encoded_file
 
-  def create_binary do
-    store = :avro_schema_store.import_file('./lib/schema.json', :avro_schema_store.new([]))
-    encoder = :avro.make_encoder(store, [])
-    json_encoder = :avro.make_encoder(store, [{:encoding, :avro_json}])
+  #   decoded = File.read!('0-encoding')
+  #     |> (&decoder.('User', &1)).()
+  #     |> (&json_encoder.('User', &1)).()
 
-    decoder = :avro.make_decoder(store, [])
+  #   IO.inspect decoded
+
+  #   {:ok, decoded_file} = File.open "0-decoding", [:write, :utf8]
+  #   IO.write decoded_file, decoded
+  #   File.close decoded_file
+  # end
+
+  def create_file(name_folder) do
+    store = :avro_schema_store.import_file("./data/#{name_folder}/schema.avsc", :avro_schema_store.new([]))
     json_decoder = :avro.make_decoder(store, [{:encoding, :avro_json}])
 
-    encoded = File.read!('./lib/content.json')
-      |> (&json_decoder.('User', &1)).()
-      |> (&encoder.('User', &1)).()
-      |> :erlang.iolist_to_binary
+    schema = File.read!("./data/#{name_folder}/schema.avsc")
+      |> :avro_json_decoder.decode_schema
+    object = File.read!("./data/#{name_folder}/content.json")
+      |> (&json_decoder.(schema, &1)).()
 
-    IO.inspect encoded
-
-    {:ok, encoded_file} = File.open "0-encoding", [:write, :utf8]
-    IO.write encoded_file, encoded
-    File.close encoded_file
-
-    decoded = File.read!('0-encoding')
-      |> (&decoder.('User', &1)).()
-      |> (&json_encoder.('User', &1)).()
-
-    IO.inspect decoded
-
-    {:ok, decoded_file} = File.open "0-decoding", [:write, :utf8]
-    IO.write decoded_file, decoded
-    File.close decoded_file
+    :avro_ocf.write_file("./data/results/#{name_folder}.avro", store, schema, [object])
   end
 
-  def read_binary do
-    {header, schema, objects} = :avro_ocf.decode_file('./data/avro-examples/twitter.avro')
-    store = :avro_schema_store.import_file('./data/avro-examples/twitter.avsc', :avro_schema_store.new([]))
+  def read_file(name_folder) do
+    store = :avro_schema_store.import_file("./data/#{name_folder}/schema.avsc", :avro_schema_store.new([]))
     json_encoder = :avro.make_encoder(store, [{:encoding, :avro_json}])
 
-    objects
-      |> Enum.map(&json_encoder.('com.miguno.avro.twitter_schema', &1))
+    {_, _, objects} = :avro_ocf.decode_file("./data/results/#{name_folder}.avro")
+
+    IO.puts objects
+      |> Enum.map(&json_encoder.("domain.avro.Message", &1))
   end
 
-  def read_ruby do
-    {header, schema, objects} = :avro_ocf.decode_file('./data/ruby-examples/data.avro')
-    store = :avro_schema_store.import_file('./data/ruby-examples/schema.json', :avro_schema_store.new([]))
-    json_encoder = :avro.make_encoder(store, [{:encoding, :avro_json}])
-
-    objects
-      |> Enum.map(&json_encoder.('User', &1))
+  def create_simple_structure do
+    create_file('0-simple-structure')
   end
 
-  def create_file do
-    filename = './data/elixir-examples/data.avro'
-    store = :avro_schema_store.import_file('./data/elixir-examples/schema.avsc', :avro_schema_store.new([]))
-    {:ok, type} = :avro_schema_store.lookup_type('User', store)
-    json_decoder = :avro.make_decoder(store, [{:encoding, :avro_json}])
-    object = File.read!('./data/elixir-examples/content.json') |> (&json_decoder.('User', &1)).()
-
-    :avro_ocf.write_file(filename, store, type, [object])
-    # - 1 you need to edfine the type make store as undefined and see from there.
-    # - 2 you need to understand what is the store and what is the type
+  def read_simple_structure do
+    read_file('0-simple-structure')
   end
 
-  def read_elixir do
-    {header, schema, objects} = :avro_ocf.decode_file('./data/elixir-examples/data.avro')
-    store = :avro_schema_store.import_file('./data/elixir-examples/schema.avsc', :avro_schema_store.new([]))
-    json_encoder = :avro.make_encoder(store, [{:encoding, :avro_json}])
+  def create_complex_structure do
+    create_file('1-complex-structure')
+  end
 
-    objects
-      |> Enum.map(&json_encoder.('User', &1))
+  def read_complex_structure do
+    read_file('1-complex-structure')
+  end
+
+  def create_notifier_service do
+    create_file('2-notifier-service')
+  end
+
+  def read_notifier_service do
+    read_file('2-notifier-service')
   end
 end
 
-# Elixiravro.create_binary
-# Elixiravro.read_binary
-# Elixiravro.create_file
-# Elixiravro.read_elixir
+Elixiravro.create_simple_structure
+Elixiravro.read_simple_structure
+Elixiravro.create_complex_structure
+Elixiravro.read_complex_structure
+Elixiravro.create_notifier_service
+Elixiravro.read_notifier_service

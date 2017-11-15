@@ -1,7 +1,4 @@
-{
-  "type" : "record",
-  "name" : "twitter_schema",
-  "namespace" : "com.miguno.avro",
+{"type" : "record", "name" : "Message", "namespace" : "domain.avro",
   "fields" : [ {
     "name" : "username",
     "type" : "string",
